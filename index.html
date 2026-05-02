@@ -283,12 +283,67 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Noto San
 .ch-pts    { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.7rem; }
 .ch-pt     { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.22); color: rgba(255,255,255,0.88); padding: 0.32rem 1rem; border-radius: 20px; font-size: 0.83rem; }
 
+/* ── LECTURER SLIDE ── */
+#s-lecturer {
+  background: linear-gradient(135deg, #0d1b2a 0%, #1a2a3a 50%, #0a1520 100%);
+  color: white;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 4rem;
+  padding: 70px 80px 76px;
+}
+.lec-photo-wrap {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+.lec-photo {
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid var(--gold);
+  box-shadow: 0 0 40px rgba(212,175,55,0.3);
+}
+.lec-name  { font-size: 1.4rem; font-weight: 900; color: white; text-align: center; }
+.lec-role  { font-size: 0.88rem; color: rgba(255,255,255,0.55); text-align: center; letter-spacing: 1px; }
+.lec-info  { flex: 1; max-width: 580px; }
+.lec-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 4px; color: var(--gold); margin-bottom: 0.8rem; text-transform: uppercase; }
+.lec-divider { width: 40px; height: 3px; background: var(--gold); border-radius: 2px; margin-bottom: 1.4rem; }
+.lec-section { margin-bottom: 1.1rem; }
+.lec-section-title {
+  font-size: 0.78rem; font-weight: 700;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 2px; text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+.lec-awards { display: flex; flex-direction: column; gap: 0.3rem; }
+.lec-award {
+  display: flex; align-items: baseline; gap: 8px;
+  font-size: 0.86rem; color: rgba(255,255,255,0.85);
+  line-height: 1.5;
+}
+.lec-award::before { content: '🏆'; font-size: 0.8rem; flex-shrink: 0; }
+.lec-exp { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+.lec-tag {
+  background: rgba(212,175,55,0.12);
+  border: 1px solid rgba(212,175,55,0.3);
+  color: #f5d97a;
+  padding: 0.25rem 0.8rem;
+  border-radius: 12px;
+  font-size: 0.78rem;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .slide { padding: 60px 20px 72px; }
   .cards.c2, .cards.c3 { grid-template-columns: 1fr; }
   .toc-grid { grid-template-columns: 1fr; }
   #dots { display: none; }
+  #s-lecturer { flex-direction: column; gap: 1.5rem; padding: 70px 20px 76px; }
+  .lec-photo { width: 140px; height: 140px; }
 }
 </style>
 </head>
@@ -316,56 +371,93 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Noto San
   </div>
 </div>
 
-<!-- ══ SLIDE 2: TABLE OF CONTENTS ══ -->
+<!-- ══ SLIDE 2: LECTURER INTRODUCTION ══ -->
+<div class="slide" id="s-lecturer" data-i="1">
+  <div class="lec-photo-wrap">
+    <img class="lec-photo" src="teacher.png" alt="許凱琳老師">
+    <div class="lec-name">許凱琳 老師</div>
+    <div class="lec-role">新北市大豐國小 · 自然教師</div>
+  </div>
+  <div class="lec-info">
+    <div class="lec-label">LECTURER · 講師介紹</div>
+    <div class="lec-divider"></div>
+    <div class="lec-section">
+      <div class="lec-section-title">🏆 榮譽獎項</div>
+      <div class="lec-awards">
+        <div class="lec-award">115年新北市特殊優良教師</div>
+        <div class="lec-award">112年新北市 Super 師獎</div>
+        <div class="lec-award">教育部「數位學習推動優良案」自主學習組佳作</div>
+        <div class="lec-award">ViewSonic 創新教師獎 TOP 10</div>
+      </div>
+    </div>
+    <div class="lec-section">
+      <div class="lec-section-title">📋 經歷與認證</div>
+      <div class="lec-exp">
+        <span class="lec-tag">新北市智慧學習輔導小組</span>
+        <span class="lec-tag">教育部 A1 數位學習講師</span>
+        <span class="lec-tag">教育部 B3 數位教學講師</span>
+        <span class="lec-tag">教育部 B5-1 生成式AI講師</span>
+        <span class="lec-tag">Gemini 認證講師</span>
+        <span class="lec-tag">iPad 種子教師 2019–2026</span>
+        <span class="lec-tag">臺灣iPad種子教師推動小組</span>
+        <span class="lec-tag">新北市學習吧核心小組講師</span>
+        <span class="lec-tag">Apple Learning Coach</span>
+        <span class="lec-tag">Apple 專業學習專家 APLS</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 3: TABLE OF CONTENTS ══ -->
 <div class="slide" id="s2" data-i="1">
   <div class="toc-head">📋 簡報目錄</div>
   <div class="toc-bar"></div>
   <div class="toc-grid">
-    <div class="toc-row nepal" onclick="go(2)">
+    <div class="toc-row nepal" onclick="go(3)">
       <span class="toc-n">一</span>
       <div><div class="toc-t">🇳🇵 尼泊爾篇</div><div class="toc-s">喜馬拉雅山下的古國</div></div>
     </div>
-    <div class="toc-row india" onclick="go(9)">
+    <div class="toc-row india" onclick="go(10)">
       <span class="toc-n">二</span>
       <div><div class="toc-t">🇮🇳 印度篇</div><div class="toc-s">多元文明的搖籃</div></div>
     </div>
-    <div class="toc-row blue" onclick="go(3)">
+    <div class="toc-row blue" onclick="go(4)">
       <span class="toc-n">①</span>
       <div><div class="toc-t">尼泊爾概況</div><div class="toc-s">地理、人口、國旗</div></div>
     </div>
-    <div class="toc-row blue" onclick="go(10)">
+    <div class="toc-row blue" onclick="go(11)">
       <span class="toc-n">⑥</span>
       <div><div class="toc-t">印度概況</div><div class="toc-s">世界最大民主國家</div></div>
     </div>
-    <div class="toc-row blue" onclick="go(4)">
+    <div class="toc-row blue" onclick="go(5)">
       <span class="toc-n">②</span>
       <div><div class="toc-t">宗教信仰</div><div class="toc-s">佛教與印度教的交融</div></div>
     </div>
-    <div class="toc-row blue" onclick="go(11)">
+    <div class="toc-row blue" onclick="go(12)">
       <span class="toc-n">⑦</span>
       <div><div class="toc-t">多元語言與宗教</div><div class="toc-s">22種官方語言</div></div>
     </div>
-    <div class="toc-row blue" onclick="go(5)">
+    <div class="toc-row blue" onclick="go(6)">
       <span class="toc-n">③</span>
       <div><div class="toc-t">Namaste — 問候</div><div class="toc-s">古老梵語的智慧</div></div>
     </div>
-    <div class="toc-row blue" onclick="go(12)">
+    <div class="toc-row blue" onclick="go(13)">
       <span class="toc-n">⑧</span>
       <div><div class="toc-t">繽紛節慶</div><div class="toc-s">灑紅節、排燈節</div></div>
     </div>
-    <div class="toc-row blue" onclick="go(6)">
+    <div class="toc-row blue" onclick="go(7)">
       <span class="toc-n">④</span>
       <div><div class="toc-t">尼泊爾節慶</div><div class="toc-s">大燈節、達善節</div></div>
     </div>
-    <div class="toc-row blue" onclick="go(13)">
+    <div class="toc-row blue" onclick="go(14)">
       <span class="toc-n">⑨</span>
       <div><div class="toc-t">印度美食</div><div class="toc-s">咖哩、香料的世界</div></div>
     </div>
-    <div class="toc-row blue" onclick="go(7)">
+    <div class="toc-row blue" onclick="go(8)">
       <span class="toc-n">⑤</span>
       <div><div class="toc-t">尼泊爾飲食</div><div class="toc-s">達巴特、莫莫餃子</div></div>
     </div>
-    <div class="toc-row blue" onclick="go(15)">
+    <div class="toc-row blue" onclick="go(16)">
       <span class="toc-n">⑩</span>
       <div><div class="toc-t">馬杜巴尼藝術</div><div class="toc-s">Madhubani Painting</div></div>
     </div>
