@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>尼印豐彩 — 互動簡報</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --nepal-red: #C8102E;
+  --nepal-blue: #003087;
+  --india-saffron: #FF9933;
+  --india-green: #138808;
+  --gold: #D4AF37;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Noto Sans TC', sans-serif; }
+
+/* ── PROGRESS BAR ── */
+#progress {
+  position: fixed; top: 0; left: 0;
+  height: 4px; background: linear-gradient(90deg, var(--india-saffron), var(--gold), var(--nepal-red));
+  transition: width 0.4s ease; z-index: 200;
+}
+
+/* ── SLIDES ── */
+#slides { width: 100%; height: 100vh; position: relative; }
+.slide {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  opacity: 0; transform: translateX(60px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+  pointer-events: none;
+  padding: 70px 60px 76px;
+  overflow: hidden;
+}
+.slide.active  { opacity: 1; transform: translateX(0); pointer-events: auto; z-index: 1; }
+.slide.exiting { opacity: 0; transform: translateX(-60px); }
+
+/* ── NAV BAR ── */
+#nav {
+  position: fixed; bottom: 0; left: 0; right: 0; height: 60px;
+  background: rgba(10,10,10,0.92); backdrop-filter: blur(12px);
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  z-index: 100; border-top: 1px solid rgba(255,255,255,0.08);
+}
+.nb {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 18px; border-radius: 24px;
+  border: 1.5px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.07);
+  color: white; font-size: 0.88rem;
+  font-family: 'Noto Sans TC', sans-serif;
+  cursor: pointer; transition: all 0.2s;
+}
+.nb:hover:not(:disabled) { background: rgba(255,255,255,0.2); border-color: white; }
+.nb:disabled { opacity: 0.28; cursor: default; }
+.nb.home { background: rgba(212,175,55,0.15); border-color: rgba(212,175,55,0.6); color: var(--gold); }
+.nb.home:hover { background: rgba(212,175,55,0.35); }
+#counter {
+  color: rgba(255,255,255,0.55); font-size: 0.82rem;
+  min-width: 68px; text-align: center; letter-spacing: 1px;
+}
+/* Slide dots */
+#dots { display: flex; gap: 5px; align-items: center; }
+.dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: rgba(255,255,255,0.2); cursor: pointer;
+  transition: all 0.2s;
+}
+.dot.active { background: var(--gold); transform: scale(1.3); }
+.dot:hover { background: rgba(255,255,255,0.5); }
+
+/* ── SHARED SLIDE ELEMENTS ── */
+.deco-circle {
+  position: absolute; border-radius: 50%;
+  pointer-events: none;
+}
+.label {
+  font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 4px; text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+.title { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 900; line-height: 1.15; margin-bottom: 0.4rem; }
+.lead  { font-size: 0.95rem; opacity: 0.65; margin-bottom: 1.6rem; }
+.divider { width: 48px; height: 3px; border-radius: 2px; margin-bottom: 1.6rem; }
+.cards { display: grid; gap: 0.85rem; width: 100%; }
+.cards.c2 { grid-template-columns: 1fr 1fr; }
+.cards.c3 { grid-template-columns: 1fr 1fr 1fr; }
+.card { border-radius: 14px; padding: 1.2rem 1.4rem; }
+.card-icon { font-size: 1.6rem; margin-bottom: 0.5rem; }
+.card-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.35rem; }
+.card-body { font-size: 0.84rem; line-height: 1.72; }
+
+/* ═══════════════════════════════
+   SLIDE-SPECIFIC STYLES
+═══════════════════════════════ */
+
+/* S1 — Cover */
+#s1 {
+  background: linear-gradient(140deg, #1a0a00 0%, #3D0C11 32%, #0A1F44 68%, #0D1B2A 100%);
+  text-align: center; color: white;
+}
+#s1 .flags { font-size: 4.5rem; margin-bottom: 1.2rem; animation: bob 3s ease-in-out infinite; }
+@keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+#s1 .eyebrow { color: var(--gold); font-size: 0.88rem; letter-spacing: 5px; text-transform: uppercase; margin-bottom: 1rem; }
+#s1 .main-t  { font-size: clamp(3rem, 10vw, 6.5rem); font-weight: 900; color: white; letter-spacing: 0.18em; margin-bottom: 0.3rem; }
+#s1 .main-t span { color: var(--gold); }
+#s1 .school  { color: rgba(255,255,255,0.55); font-size: 1rem; letter-spacing: 2px; margin-bottom: 2.2rem; }
+#s1 .tags    { display: flex; flex-wrap: wrap; gap: 0.55rem; justify-content: center; }
+#s1 .tag     { background: rgba(255,255,255,0.09); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.85); padding: 0.3rem 1rem; border-radius: 20px; font-size: 0.82rem; }
+
+/* S2 — TOC */
+#s2 { background: linear-gradient(160deg, #fdfaf5 0%, #f3eada 100%); }
+.toc-head { font-size: 1.8rem; font-weight: 900; color: #2C1810; margin-bottom: 0.4rem; text-align: center; }
+.toc-bar  { width: 56px; height: 3px; background: var(--gold); margin: 0 auto 1.8rem; border-radius: 2px; }
+.toc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; max-width: 780px; width: 100%; }
+.toc-row  { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 12px; cursor: pointer; transition: all 0.18s; border: 2px solid transparent; }
+.toc-row.nepal  { background: #fff0f3; border-color: #f8c8d0; }
+.toc-row.india  { background: #fffaf0; border-color: #fde4b0; }
+.toc-row.blue   { background: #f0f4ff; border-color: #c8d4f8; }
+.toc-row:hover  { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+.toc-row.nepal:hover { background: var(--nepal-red); color: white; border-color: var(--nepal-red); }
+.toc-row.india:hover { background: var(--india-saffron); color: white; border-color: var(--india-saffron); }
+.toc-row.blue:hover  { background: var(--nepal-blue); color: white; border-color: var(--nepal-blue); }
+.toc-n { font-size: 1.3rem; font-weight: 900; opacity: 0.35; width: 28px; }
+.toc-t { font-size: 0.9rem; font-weight: 700; }
+.toc-s { font-size: 0.75rem; color: #888; }
+.toc-row:hover .toc-s { color: rgba(255,255,255,0.7); }
+
+/* S3 — Nepal Chapter Cover */
+#s3 { background: linear-gradient(135deg, #7a0018 0%, #C8102E 48%, #003087 100%); color: white; text-align: center; }
+
+/* S4 — Nepal Overview */
+#s4 { background: #fdfaf5; }
+#s4 .label   { color: var(--nepal-red); }
+#s4 .title   { color: #2C1810; }
+#s4 .divider { background: var(--nepal-red); }
+#s4 .card    { background: #fff5f7; border: 1px solid #f0c8d0; }
+#s4 .card-title { color: var(--nepal-red); }
+#s4 .card-body  { color: #4a4a4a; }
+
+/* S5 — Religion */
+#s5 { background: linear-gradient(160deg, #0f0b38 0%, #0a1e6a 100%); color: white; }
+#s5 .label   { color: rgba(255,255,255,0.45); }
+#s5 .title   { color: white; }
+#s5 .lead    { color: rgba(255,255,255,0.6); }
+#s5 .divider { background: var(--gold); }
+#s5 .card    { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.14); }
+#s5 .card-title { color: var(--gold); }
+#s5 .card-body  { color: rgba(255,255,255,0.8); }
+
+/* S6 — Namaste */
+#s6 {
+  background: radial-gradient(ellipse at center, #3a1080 0%, #1e0850 50%, #100430 100%);
+  color: white; text-align: center;
+}
+#s6 .hand     { font-size: 5rem; animation: pulse 2.2s ease-in-out infinite; margin-bottom: 0.6rem; }
+@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+#s6 .nw       { font-size: clamp(2.5rem, 8vw, 5rem); font-weight: 900; color: var(--gold); letter-spacing: 0.08em; margin-bottom: 0.2rem; }
+#s6 .ndeva    { font-size: 2rem; color: rgba(255,255,255,0.45); margin-bottom: 1.5rem; }
+#s6 .ndef     { max-width: 560px; font-size: 1rem; line-height: 1.9; color: rgba(255,255,255,0.85); margin-bottom: 2rem; }
+#s6 .nbadges  { display: flex; gap: 1.2rem; justify-content: center; flex-wrap: wrap; }
+#s6 .nbadge   { background: rgba(255,255,255,0.09); border: 1px solid rgba(255,255,255,0.2); padding: 0.8rem 1.8rem; border-radius: 12px; text-align: center; }
+#s6 .nbadge-icon { font-size: 1.8rem; }
+#s6 .nbadge-text { font-size: 0.78rem; color: rgba(255,255,255,0.55); margin-top: 4px; }
+#s6 .note     { margin-top: 1.5rem; font-size: 0.85rem; color: rgba(255,255,255,0.38); font-style: italic; }
+
+/* S7 — Nepal Festivals */
+#s7 { background: linear-gradient(160deg, #0d2e0d 0%, #0a4018 100%); color: white; }
+#s7 .label   { color: rgba(255,255,255,0.4); }
+#s7 .title   { color: white; }
+#s7 .lead    { color: rgba(255,255,255,0.55); }
+#s7 .divider { background: #4ade80; }
+#s7 .card    { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); }
+#s7 .card-title { color: #86efac; }
+#s7 .card-body  { color: rgba(255,255,255,0.8); }
+
+/* S8 — Nepal Food */
+#s8 { background: #fffbf4; }
+#s8 .label   { color: #b05800; }
+#s8 .title   { color: #2C1810; }
+#s8 .divider { background: var(--india-saffron); }
+#s8 .card    { background: #fff8ea; border: 1px solid #fde8b8; }
+#s8 .card-title { color: #b05800; }
+#s8 .card-body  { color: #4a4a4a; }
+
+/* S9 — Nepal Architecture */
+#s9 { background: linear-gradient(160deg, #2a1c00 0%, #4a3000 100%); color: white; }
+#s9 .label   { color: var(--gold); }
+#s9 .title   { color: white; }
+#s9 .lead    { color: rgba(255,255,255,0.55); }
+#s9 .divider { background: var(--gold); }
+#s9 .card    { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.14); }
+#s9 .card-title { color: var(--gold); }
+#s9 .card-body  { color: rgba(255,255,255,0.8); }
+
+/* S10 — India Chapter Cover */
+#s10 { background: linear-gradient(135deg, #7a3200 0%, #e87000 38%, #116600 100%); color: white; text-align: center; }
+
+/* S11 — India Overview */
+#s11 { background: #fffaf2; }
+#s11 .label   { color: #b06000; }
+#s11 .title   { color: #2C1810; }
+#s11 .divider { background: var(--india-saffron); }
+#s11 .card    { background: #fff8ea; border: 1px solid #fde8b8; }
+#s11 .card-title { color: #b06000; }
+#s11 .card-body  { color: #4a4a4a; }
+
+/* S12 — Languages & Religions */
+#s12 { background: linear-gradient(160deg, #081830 0%, #082850 100%); color: white; }
+#s12 .label   { color: rgba(255,255,255,0.4); }
+#s12 .title   { color: white; }
+#s12 .lead    { color: rgba(255,255,255,0.55); }
+#s12 .divider { background: var(--india-saffron); }
+#s12 .card    { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.14); }
+#s12 .card-title { color: var(--india-saffron); }
+#s12 .card-body  { color: rgba(255,255,255,0.8); }
+.pills { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.pill  { background: rgba(255,153,51,0.18); border: 1px solid rgba(255,153,51,0.35); color: #ffcc80; padding: 2px 9px; border-radius: 10px; font-size: 0.76rem; }
+
+/* S13 — India Festivals */
+#s13 { background: linear-gradient(160deg, #300850 0%, #580a80 100%); color: white; }
+#s13 .label   { color: rgba(255,255,255,0.4); }
+#s13 .title   { color: white; }
+#s13 .lead    { color: rgba(255,255,255,0.55); }
+#s13 .divider { background: #e879f9; }
+#s13 .card    { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.13); }
+#s13 .card-title { color: #f0abfc; }
+#s13 .card-body  { color: rgba(255,255,255,0.8); }
+
+/* S14 — India Food */
+#s14 { background: #fff8f0; }
+#s14 .label   { color: #b04000; }
+#s14 .title   { color: #2C1810; }
+#s14 .divider { background: #ff6600; }
+#s14 .card    { background: #fff0e0; border: 1px solid #ffd0a0; }
+#s14 .card-title { color: #b04000; }
+#s14 .card-body  { color: #4a4a4a; }
+
+/* S15 — School Life */
+#s15 { background: linear-gradient(160deg, #001830 0%, #002850 100%); color: white; }
+#s15 .label   { color: rgba(255,255,255,0.4); }
+#s15 .title   { color: white; }
+#s15 .lead    { color: rgba(255,255,255,0.55); }
+#s15 .divider { background: #60a5fa; }
+#s15 .card    { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.14); }
+#s15 .card-title { color: #93c5fd; }
+#s15 .card-body  { color: rgba(255,255,255,0.8); }
+
+/* S16 — Madhubani Art */
+#s16 { background: linear-gradient(160deg, #3a0820 0%, #700a38 100%); color: white; }
+#s16 .label   { color: rgba(255,255,255,0.4); }
+#s16 .title   { color: white; }
+#s16 .lead    { color: rgba(255,255,255,0.6); }
+#s16 .divider { background: #f9a8d4; }
+#s16 .card    { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.14); }
+#s16 .card-title { color: #fbb6ce; }
+#s16 .card-body  { color: rgba(255,255,255,0.8); }
+
+/* S17 — Ending */
+#s17 {
+  background: linear-gradient(140deg, #1a0a00 0%, #2c1000 30%, #081a40 70%, #0d1b2a 100%);
+  color: white; text-align: center;
+}
+#s17 .globe   { font-size: 4rem; margin-bottom: 1rem; animation: spin 8s linear infinite; }
+@keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+#s17 .etitle  { font-size: clamp(1.8rem, 5vw, 3rem); font-weight: 900; color: var(--gold); margin-bottom: 0.4rem; }
+#s17 .esub    { color: rgba(255,255,255,0.5); font-size: 1rem; letter-spacing: 2px; margin-bottom: 1.8rem; }
+#s17 .ebody   { max-width: 580px; font-size: 0.97rem; color: rgba(255,255,255,0.82); line-height: 1.95; margin-bottom: 1.8rem; }
+#s17 .eflags  { display: flex; align-items: center; gap: 1.5rem; justify-content: center; margin-bottom: 1.5rem; }
+#s17 .eflag   { text-align: center; }
+#s17 .eflag span { font-size: 2.6rem; display: block; }
+#s17 .eflag small { color: rgba(255,255,255,0.4); font-size: 0.75rem; margin-top: 2px; display: block; }
+#s17 .ehandshake { font-size: 2.2rem; color: var(--gold); }
+#s17 .eschool { color: rgba(255,255,255,0.3); font-size: 0.82rem; letter-spacing: 2px; margin-top: 0.5rem; }
+
+/* Chapter cover shared */
+.ch-badge  { display: inline-block; background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.28); color: rgba(255,255,255,0.85); font-size: 0.8rem; font-weight: 700; letter-spacing: 3px; padding: 0.35rem 1.2rem; border-radius: 20px; margin-bottom: 1.4rem; }
+.ch-big    { font-size: clamp(2.5rem, 8vw, 5rem); font-weight: 900; color: white; margin-bottom: 0.5rem; line-height: 1.15; }
+.ch-sub    { color: rgba(255,255,255,0.65); font-size: 1.05rem; margin-bottom: 2rem; letter-spacing: 1px; }
+.ch-pts    { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.7rem; }
+.ch-pt     { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.22); color: rgba(255,255,255,0.88); padding: 0.32rem 1rem; border-radius: 20px; font-size: 0.83rem; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .slide { padding: 60px 20px 72px; }
+  .cards.c2, .cards.c3 { grid-template-columns: 1fr; }
+  .toc-grid { grid-template-columns: 1fr; }
+  #dots { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<div id="slides">
+
+<!-- ══ SLIDE 1: COVER ══ -->
+<div class="slide active" id="s1" data-i="0">
+  <div class="deco-circle" style="width:700px;height:700px;background:rgba(200,16,46,0.1);top:-250px;left:-250px;"></div>
+  <div class="deco-circle" style="width:500px;height:500px;background:rgba(255,153,51,0.08);bottom:-180px;right:-180px;"></div>
+  <div class="flags">🇳🇵 🇮🇳</div>
+  <div class="eyebrow">大豐國小 · 文山區國際文教中心</div>
+  <div class="main-t">尼印<span>豐</span>彩</div>
+  <div class="school">探索南亞兩大文明的美麗與智慧</div>
+  <div class="tags">
+    <span class="tag">🏔️ 喜馬拉雅山</span>
+    <span class="tag">🕌 千年古廟</span>
+    <span class="tag">🎨 豐富藝術</span>
+    <span class="tag">🍛 特色美食</span>
+    <span class="tag">🎭 繽紛節慶</span>
+    <span class="tag">🙏 Namaste</span>
+  </div>
+</div>
+
+<!-- ══ SLIDE 2: TABLE OF CONTENTS ══ -->
+<div class="slide" id="s2" data-i="1">
+  <div class="toc-head">📋 簡報目錄</div>
+  <div class="toc-bar"></div>
+  <div class="toc-grid">
+    <div class="toc-row nepal" onclick="go(2)">
+      <span class="toc-n">一</span>
+      <div><div class="toc-t">🇳🇵 尼泊爾篇</div><div class="toc-s">喜馬拉雅山下的古國</div></div>
+    </div>
+    <div class="toc-row india" onclick="go(9)">
+      <span class="toc-n">二</span>
+      <div><div class="toc-t">🇮🇳 印度篇</div><div class="toc-s">多元文明的搖籃</div></div>
+    </div>
+    <div class="toc-row blue" onclick="go(3)">
+      <span class="toc-n">①</span>
+      <div><div class="toc-t">尼泊爾概況</div><div class="toc-s">地理、人口、國旗</div></div>
+    </div>
+    <div class="toc-row blue" onclick="go(10)">
+      <span class="toc-n">⑥</span>
+      <div><div class="toc-t">印度概況</div><div class="toc-s">世界最大民主國家</div></div>
+    </div>
+    <div class="toc-row blue" onclick="go(4)">
+      <span class="toc-n">②</span>
+      <div><div class="toc-t">宗教信仰</div><div class="toc-s">佛教與印度教的交融</div></div>
+    </div>
+    <div class="toc-row blue" onclick="go(11)">
+      <span class="toc-n">⑦</span>
+      <div><div class="toc-t">多元語言與宗教</div><div class="toc-s">22種官方語言</div></div>
+    </div>
+    <div class="toc-row blue" onclick="go(5)">
+      <span class="toc-n">③</span>
+      <div><div class="toc-t">Namaste — 問候</div><div class="toc-s">古老梵語的智慧</div></div>
+    </div>
+    <div class="toc-row blue" onclick="go(12)">
+      <span class="toc-n">⑧</span>
+      <div><div class="toc-t">繽紛節慶</div><div class="toc-s">灑紅節、排燈節</div></div>
+    </div>
+    <div class="toc-row blue" onclick="go(6)">
+      <span class="toc-n">④</span>
+      <div><div class="toc-t">尼泊爾節慶</div><div class="toc-s">大燈節、達善節</div></div>
+    </div>
+    <div class="toc-row blue" onclick="go(13)">
+      <span class="toc-n">⑨</span>
+      <div><div class="toc-t">印度美食</div><div class="toc-s">咖哩、香料的世界</div></div>
+    </div>
+    <div class="toc-row blue" onclick="go(7)">
+      <span class="toc-n">⑤</span>
+      <div><div class="toc-t">尼泊爾飲食</div><div class="toc-s">達巴特、莫莫餃子</div></div>
+    </div>
+    <div class="toc-row blue" onclick="go(15)">
+      <span class="toc-n">⑩</span>
+      <div><div class="toc-t">馬杜巴尼藝術</div><div class="toc-s">Madhubani Painting</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 3: NEPAL CHAPTER COVER ══ -->
+<div class="slide" id="s3" data-i="2">
+  <div class="deco-circle" style="width:500px;height:500px;background:rgba(255,255,255,0.04);top:-100px;right:-100px;"></div>
+  <div class="ch-badge">第一部分</div>
+  <div class="ch-big">🇳🇵 尼泊爾</div>
+  <div class="ch-sub">喜馬拉雅山下的古國</div>
+  <div class="ch-pts">
+    <span class="ch-pt">🏔️ 世界最高峰所在地</span>
+    <span class="ch-pt">🙏 佛教與印度教聖地</span>
+    <span class="ch-pt">🏛️ 古老建築文化</span>
+    <span class="ch-pt">🥘 獨特飲食傳統</span>
+    <span class="ch-pt">🎊 豐富節慶文化</span>
+  </div>
+</div>
+
+<!-- ══ SLIDE 4: NEPAL OVERVIEW ══ -->
+<div class="slide" id="s4" data-i="3">
+  <div class="label">NEPAL · 尼泊爾</div>
+  <div class="title">尼泊爾概況</div>
+  <div class="lead">喜馬拉雅山麓的神秘古國</div>
+  <div class="divider"></div>
+  <div class="cards c3">
+    <div class="card">
+      <div class="card-icon">🗺️</div>
+      <div class="card-title">地理位置</div>
+      <div class="card-body">位於南亞，夾在中國與印度之間。北部為喜馬拉雅山脈，包含世界最高峰珠穆朗瑪峰（8,848m）。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">👥</div>
+      <div class="card-title">基本資訊</div>
+      <div class="card-body">人口約 3,000 萬人，首都加德滿都。國語尼泊爾語，但有超過 100 種民族語言共存。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🏳️</div>
+      <div class="card-title">世界唯一非矩形國旗</div>
+      <div class="card-body">由兩個三角形組成，象徵喜馬拉雅山。紅色代表勇氣，藍色邊框代表和平。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🏔️</div>
+      <div class="card-title">登山聖地</div>
+      <div class="card-body">境內有8座世界前10高峰，是全球登山者的朝聖地，也是瑜珈、冥想、頌缽與佛學的發源地。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🏙️</div>
+      <div class="card-title">加德滿都谷地</div>
+      <div class="card-body">首都谷地內有7個世界文化遺產，是尼泊爾的政治、文化與宗教中心，古廟宇密布。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🌿</div>
+      <div class="card-title">多元民族</div>
+      <div class="card-body">尼泊爾有百餘個民族，包括尼瓦爾、塔芒、夏爾巴等，各有獨特語言、服飾與文化傳統。</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 5: RELIGION ══ -->
+<div class="slide" id="s5" data-i="4">
+  <div class="label">RELIGION · 宗教信仰</div>
+  <div class="title">佛教與印度教的交融</div>
+  <div class="lead">世界上宗教最和諧共存的國家之一，也是佛陀的誕生地</div>
+  <div class="divider"></div>
+  <div class="cards c2">
+    <div class="card">
+      <div class="card-icon">☸️</div>
+      <div class="card-title">佛教 Buddhism</div>
+      <div class="card-body">藍毗尼（Lumbini）是佛陀悉達多·喬達摩的誕生地，是全球佛教徒的聖地。尼泊爾佛教融入密宗元素，形成金剛乘（藏傳佛教）傳統，與印度教長期共存。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🕉️</div>
+      <div class="card-title">印度教 Hinduism</div>
+      <div class="card-body">約 81% 的尼泊爾人信奉印度教。帕蘇帕提那寺（Pashupatinath Temple）是南亞最重要的濕婆神廟。主要神明：梵天（創造）、毗濕奴（維護）、濕婆（毀滅）三位一體。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">👸</div>
+      <div class="card-title">活女神庫瑪麗</div>
+      <div class="card-body">庫瑪麗（Kumari）是尼泊爾獨特傳統，從婆羅門女孩中選出神力附體的「活女神」，在加德滿都接受供奉，直到初潮為止，是宗教與文化的特殊結合。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🏛️</div>
+      <div class="card-title">宗教共融典範</div>
+      <div class="card-body">尼泊爾印度教徒和佛教徒共享許多神廟與節慶，兩者邊界模糊、和諧共處，是全球罕見的宗教融合典範，也吸引無數研究者與朝聖者前來。</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 6: NAMASTE ══ -->
+<div class="slide" id="s6" data-i="5">
+  <div class="deco-circle" style="width:450px;height:450px;background:rgba(212,175,55,0.06);top:50%;left:50%;transform:translate(-50%,-50%);"></div>
+  <div class="hand">🙏</div>
+  <div class="nw">Namaste</div>
+  <div class="ndeva">नमस्ते</div>
+  <div class="ndef">
+    源自古老梵語，<strong style="color:var(--gold)">「Namas」有鞠躬、禮敬之意</strong>。<br>
+    完整的意涵是 <strong style="color:var(--gold)">「整個天地宇宙一起祝福你」</strong>，<br>
+    有別於一般「你好」的打招呼方式，<br>
+    它蘊含了對對方靈魂深處的尊重與祝福。
+  </div>
+  <div class="nbadges">
+    <div class="nbadge">
+      <div class="nbadge-icon">🇳🇵</div>
+      <div class="nbadge-text">尼泊爾常用語</div>
+    </div>
+    <div class="nbadge">
+      <div class="nbadge-icon">🇮🇳</div>
+      <div class="nbadge-text">印度常用語</div>
+    </div>
+  </div>
+  <div class="note">雙手合十於胸前，是南亞文化中最普遍的問候姿態</div>
+</div>
+
+<!-- ══ SLIDE 7: NEPAL FESTIVALS ══ -->
+<div class="slide" id="s7" data-i="6">
+  <div class="label">FESTIVALS · 節慶</div>
+  <div class="title">尼泊爾的節慶文化</div>
+  <div class="lead">每年超過 50 個節日，是世界上節慶最豐富的國家之一</div>
+  <div class="divider"></div>
+  <div class="cards c2">
+    <div class="card">
+      <div class="card-icon">🪔</div>
+      <div class="card-title">大燈節 Tihar</div>
+      <div class="card-body">五天的燈光節慶，每天拜不同的動物（烏鴉、狗、牛）和神明。第三天為主節，用油燈、蠟燭和彩燈裝飾全家，是尼泊爾版的「排燈節」。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🎭</div>
+      <div class="card-title">因陀羅節 Indra Jatra</div>
+      <div class="card-body">加德滿都最重要的街頭節慶，持續8天，是活女神庫瑪麗公開露面的重要時刻。人們穿著神明服裝遊行、舞蹈，充滿活力。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🌸</div>
+      <div class="card-title">灑紅節 Holi</div>
+      <div class="card-body">與印度共享的春節慶典，人們互相潑灑彩色粉末，象徵春天的到來與惡靈的驅除，是歡樂的顏色嘉年華！</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🎋</div>
+      <div class="card-title">達善節 Dashain</div>
+      <div class="card-body">最重要的印度教節日，持續15天，慶祝女神杜爾迦戰勝惡魔。家人團聚、長輩在晚輩額頭點上「提卡」祝福是核心儀式。</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 8: NEPAL FOOD ══ -->
+<div class="slide" id="s8" data-i="7">
+  <div class="label">FOOD · 飲食文化</div>
+  <div class="title">尼泊爾的飲食世界</div>
+  <div class="lead">以達巴特為主食，融合印度、藏族與本土風味</div>
+  <div class="divider"></div>
+  <div class="cards c3">
+    <div class="card">
+      <div class="card-icon">🍱</div>
+      <div class="card-title">達巴特 Dal Bhat</div>
+      <div class="card-body">尼泊爾「國民料理」！由米飯（Bhat）、扁豆湯（Dal）、蔬菜咖哩、醃菜（Achar）組成，每天兩餐必吃。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🥟</div>
+      <div class="card-title">莫莫 Momo</div>
+      <div class="card-body">尼泊爾版餃子，源自西藏，有蒸、煎、湯等多種做法，內餡有蔬菜、水牛肉、雞肉等，是最受歡迎的街頭小吃。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🍜</div>
+      <div class="card-title">他克里 Thukpa</div>
+      <div class="card-body">藏式湯麵，融入尼泊爾香料，湯底濃郁，加入蔬菜或肉類。在山地寒冷氣候中特別暖胃。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🫔</div>
+      <div class="card-title">恰帕提 Chapati</div>
+      <div class="card-body">全麥薄餅，與印度恰帕提相似，用來搭配咖哩或沾醬食用，是南亞常見的主食之一。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🍵</div>
+      <div class="card-title">奶茶 Chiya</div>
+      <div class="card-body">以紅茶加牛奶、糖、荳蔻等香料煮成，是尼泊爾人日常最重要的飲品，早晨必備，也是待客之道。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🌶️</div>
+      <div class="card-title">香料文化</div>
+      <div class="card-body">孜然、薑黃、胡荽、薑、辣椒是尼泊爾料理的靈魂，不僅增添風味，也有傳統醫療保健的作用。</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 9: NEPAL ARCHITECTURE ══ -->
+<div class="slide" id="s9" data-i="8">
+  <div class="label">ARCHITECTURE · 建築藝術</div>
+  <div class="title">尼泊爾的建築之美</div>
+  <div class="lead">獨特的帕哥達式建築，融合印度瓦思杜觀念與在地傳統</div>
+  <div class="divider"></div>
+  <div class="cards c2">
+    <div class="card">
+      <div class="card-icon">🏛️</div>
+      <div class="card-title">帕坦古城 Patan</div>
+      <div class="card-body">世界文化遺產，尼瓦爾族的藝術之都。杜巴廣場上密布精緻的木雕廟宇，展現尼泊爾匠人無與倫比的技藝。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔵</div>
+      <div class="card-title">博納特大佛塔</div>
+      <div class="card-body">世界最大的佛塔之一，藏傳佛教的聖地。白色塔身上繪有「佛眼」，注視四方，是加德滿都的標誌性建築。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🏗️</div>
+      <div class="card-title">帕哥達式建築</div>
+      <div class="card-body">多層斜屋頂的尼泊爾傳統建築，以磚頭、木雕和銅製裝飾為特色，此建築風格後來傳至中國和東南亞。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🪵</div>
+      <div class="card-title">精緻木雕藝術</div>
+      <div class="card-body">尼瓦爾族工匠以精湛木雕聞名，廟宇的窗戶、門框、柱子刻滿神話故事與宗教圖騰，每一件都是珍貴藝術品。</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 10: INDIA CHAPTER COVER ══ -->
+<div class="slide" id="s10" data-i="9">
+  <div class="deco-circle" style="width:600px;height:600px;background:rgba(255,255,255,0.04);top:-200px;right:-200px;"></div>
+  <div class="ch-badge">第二部分</div>
+  <div class="ch-big">🇮🇳 印度</div>
+  <div class="ch-sub">多元文明的搖籃</div>
+  <div class="ch-pts">
+    <span class="ch-pt">🌍 世界最大民主國家</span>
+    <span class="ch-pt">🗣️ 22種官方語言</span>
+    <span class="ch-pt">🎊 豐富多彩的節慶</span>
+    <span class="ch-pt">🍛 多元美食文化</span>
+    <span class="ch-pt">🎨 馬杜巴尼藝術</span>
+  </div>
+</div>
+
+<!-- ══ SLIDE 11: INDIA OVERVIEW ══ -->
+<div class="slide" id="s11" data-i="10">
+  <div class="label">INDIA · 印度</div>
+  <div class="title">印度概況</div>
+  <div class="lead">India is the world's largest democracy with rich traditions and diverse culture</div>
+  <div class="divider"></div>
+  <div class="cards c3">
+    <div class="card">
+      <div class="card-icon">🗺️</div>
+      <div class="card-title">地理位置</div>
+      <div class="card-body">位於南亞，面積約 330 萬平方公里，是全球第7大國。北邊連接喜馬拉雅山，南方三面臨海。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">👥</div>
+      <div class="card-title">人口規模</div>
+      <div class="card-body">2023年超越中國，成為全球人口最多的國家，約 14 億人口，是世界上最大的民主國家。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">💻</div>
+      <div class="card-title">科技大國</div>
+      <div class="card-body">班加羅爾（Bangaluru）有「印度矽谷」之稱。Google、微軟、IBM 等科技巨頭的 CEO 均為印度裔。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🏛️</div>
+      <div class="card-title">文明古國</div>
+      <div class="card-body">印度河文明距今超過 5,000 年，是世界四大文明古國之一，孕育了佛教、印度教、耆那教等宗教。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🕌</div>
+      <div class="card-title">泰姬瑪哈陵</div>
+      <div class="card-body">世界七大奇蹟之一，由蒙兀兒帝國皇帝沙賈汗為愛妻建造，是愛情與建築藝術的永恆見證。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🎬</div>
+      <div class="card-title">寶萊塢</div>
+      <div class="card-body">印度電影工業「寶萊塢」（Bollywood）是全球最大電影產業之一，融合歌舞、戲劇與豐富文化元素。</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 12: LANGUAGES & RELIGIONS ══ -->
+<div class="slide" id="s12" data-i="11">
+  <div class="label">DIVERSITY · 多元文化</div>
+  <div class="title">22種語言 · 多元宗教</div>
+  <div class="lead">22 official languages, many religions, colorful dresses, and traditions</div>
+  <div class="divider"></div>
+  <div class="cards c2">
+    <div class="card">
+      <div class="card-icon">🗣️</div>
+      <div class="card-title">22種官方語言</div>
+      <div class="card-body">
+        印度憲法認可22種官方語言，實際上有超過1,600種方言與語言。
+        <div class="pills">
+          <span class="pill">Hindi 印地語</span>
+          <span class="pill">Bengali 孟加拉語</span>
+          <span class="pill">Tamil 泰米爾語</span>
+          <span class="pill">Telugu 泰盧固語</span>
+          <span class="pill">Marathi 馬拉地語</span>
+          <span class="pill">English 英語</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🕉️</div>
+      <div class="card-title">多元宗教並存</div>
+      <div class="card-body">
+        印度是宗教的故鄉，多種信仰和諧共存：<br><br>
+        🔸 印度教（79.8%）<br>
+        🔹 伊斯蘭教（14.2%）<br>
+        ✝️ 基督教（2.3%）<br>
+        ☸️ 佛教、錫克教、耆那教（各佔少數）
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon">👗</div>
+      <div class="card-title">服飾文化</div>
+      <div class="card-body">女性的「紗麗」（Saree）是最具代表性的傳統服飾，由6公尺長的布料優雅環繞。各地穿法不同，展現各地文化特色。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🎵</div>
+      <div class="card-title">古典音樂與舞蹈</div>
+      <div class="card-body">印度有北方（印度斯坦）和南方（卡納塔克）兩大古典音樂體系，及8種古典舞蹈形式，包括婆羅多舞、卡塔克舞等。</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 13: INDIA FESTIVALS ══ -->
+<div class="slide" id="s13" data-i="12">
+  <div class="label">FESTIVALS · 節慶</div>
+  <div class="title">印度繽紛節慶</div>
+  <div class="lead">Holi, Diwali, Eid, Christmas, Pongal, Raksha Bandhan</div>
+  <div class="divider"></div>
+  <div class="cards c2">
+    <div class="card">
+      <div class="card-icon">🌈</div>
+      <div class="card-title">灑紅節 Holi</div>
+      <div class="card-body">春天的顏色節慶！人們互相潑灑彩色粉末，象徵歡迎春天、慶祝善勝於惡。源於克里希納神話，在全印度乃至全球廣受歡迎。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🪔</div>
+      <div class="card-title">排燈節 Diwali</div>
+      <div class="card-body">「光明節」，持續5天的最盛大節日。家家戶戶點亮油燈、蠟燭和彩燈，象徵光明戰勝黑暗、善勝惡、知識勝無知。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🧣</div>
+      <div class="card-title">兄妹情誼節 Raksha Bandhan</div>
+      <div class="card-body">妹妹在哥哥手腕上繫上保護手鍊「拉克沙」，哥哥承諾一生保護妹妹。紀念兄妹情誼的溫馨節日。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🐘</div>
+      <div class="card-title">布拉姆節 Puram</div>
+      <div class="card-body">喀拉拉邦的文化盛事，以盛裝大象遊行和激烈的打擊樂表演著稱，是世界最壯觀的節慶之一。</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 14: INDIA FOOD ══ -->
+<div class="slide" id="s14" data-i="13">
+  <div class="label">FOOD · 飲食文化</div>
+  <div class="title">印度飲食的世界</div>
+  <div class="lead">Spices, rice, chapati, curry, dosa, samosa, vegetarian dishes</div>
+  <div class="divider"></div>
+  <div class="cards c3">
+    <div class="card">
+      <div class="card-icon">🍛</div>
+      <div class="card-title">咖哩 Curry</div>
+      <div class="card-body">印度料理的靈魂！各地咖哩風味迥異，從北方奶油咖哩到南方椰奶咖哩，加入薑黃、孜然、荳蔻等香料調製。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🫓</div>
+      <div class="card-title">恰帕提 Chapati</div>
+      <div class="card-body">全麥薄餅，印度北方主食之一。現烤的恰帕提鬆軟有彈性，用來搭配咖哩、豆泥，常用手撕取代筷子。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🥟</div>
+      <div class="card-title">薩莫薩 Samosa</div>
+      <div class="card-body">三角形炸餃子，外皮酥脆，內餡有馬鈴薯、豌豆、香料，是印度最受歡迎的街頭小吃之一。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🥞</div>
+      <div class="card-title">多薩 Dosa</div>
+      <div class="card-body">南印度的薄脆米麵餅，以米漿和豆漿發酵煎製，搭配椰子醬和湯，薄如紙張又香脆可口。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🌿</div>
+      <div class="card-title">素食文化</div>
+      <div class="card-body">印度有世界最多素食者，約 38-40% 的人口為素食主義，源於印度教「不殺生」（Ahimsa）的宗教信仰。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🍵</div>
+      <div class="card-title">印度奶茶 Chai</div>
+      <div class="card-body">加入荳蔻、薑、肉桂、丁香的香料奶茶，每天早晨是印度人不可缺少的儀式，也是著名的「印度茶」文化。</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 15: SCHOOL LIFE ══ -->
+<div class="slide" id="s15" data-i="14">
+  <div class="label">SCHOOL LIFE · 學校生活</div>
+  <div class="title">印度的學校生活</div>
+  <div class="lead">Uniforms, morning assembly, national anthem, respect for teachers</div>
+  <div class="divider"></div>
+  <div class="cards c2">
+    <div class="card">
+      <div class="card-icon">🎒</div>
+      <div class="card-title">學校日常</div>
+      <div class="card-body">印度學生穿著制服上學，每天有早晨集會、唱國歌的傳統。學生對老師非常尊重，稱呼老師為「Sir」或「Madam」，師生關係緊密。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🍱</div>
+      <div class="card-title">午餐文化</div>
+      <div class="card-body">政府推行的「午餐計畫」為貧困學生提供免費午餐。典型午餐盒包含米飯、咖哩、蔬菜和水果，常常一起用手抓飯食用。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🧘</div>
+      <div class="card-title">瑜珈與體育</div>
+      <div class="card-body">課程包含瑜珈、板球（Cricket）和卡巴迪（Kabaddi，傳統民俗運動）等。板球幾乎是全民信仰，每逢國際賽事全國人民都屏息以待。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">📐</div>
+      <div class="card-title">課程重點</div>
+      <div class="card-body">印度學校重視數學、科學和工程。IIT（印度理工學院）是全球頂尖工程學府，小組學習、辯論、藝術都是課程的重要一部分。</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 16: MADHUBANI ART ══ -->
+<div class="slide" id="s16" data-i="15">
+  <div class="label">ART · 藝術</div>
+  <div class="title">馬杜巴尼藝術</div>
+  <div class="lead">Madhubani Art — 蜂蜜森林裡誕生的古老繪畫</div>
+  <div class="divider"></div>
+  <div class="cards c2">
+    <div class="card">
+      <div class="card-icon">🎨</div>
+      <div class="card-title">起源與歷史</div>
+      <div class="card-body">馬杜巴尼藝術（Madhubani / Mithila Painting）源自印度比哈爾邦的米蒂拉地區。「Madhubani」意思是<strong>「蜂蜜森林」</strong>，傳統上由村中女性繪製，代代相傳。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🖌️</div>
+      <div class="card-title">藝術特色</div>
+      <div class="card-body">以幾何圖案、植物、動物和神話人物為主題，線條精細，色彩鮮豔。傳統上使用手指、竹枝和天然染料，畫在牆壁、地板或布料上。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🌿</div>
+      <div class="card-title">文化意義</div>
+      <div class="card-body">馬杜巴尼畫作通常描繪婚禮、節慶、神話故事（如羅摩婚禮），是印度女性表達信仰與祈福的傳統藝術形式，更是她們傳承文化的媒介。</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🏆</div>
+      <div class="card-title">現代傳承</div>
+      <div class="card-body">1960年代旱災後，藝術家開始將畫作轉移到紙張出售，形成重要的工藝產業。現已獲得GI（地理標誌）認證，揚名國際，也出現在杯墊、布料、服飾上。</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 17: ENDING ══ -->
+<div class="slide" id="s17" data-i="16">
+  <div class="deco-circle" style="width:600px;height:600px;background:rgba(212,175,55,0.05);top:50%;left:50%;transform:translate(-50%,-50%);"></div>
+  <div class="globe">🌏</div>
+  <div class="etitle">文化交流，視野無界</div>
+  <div class="esub">跨越喜馬拉雅的友誼</div>
+  <div class="ebody">
+    透過這次「尼印豐彩」的文化探索，<br>
+    我們走進了尼泊爾的雪山廟宇，品嚐了印度的香料美食，<br>
+    感受了 <strong style="color:var(--gold)">Namaste</strong> 這個來自古老梵語的深情問候。<br><br>
+    不需要遠行，就能體驗南亞兩大文明的智慧與美麗。<br>
+    這正是文化教育最美好的意義——<br>
+    <strong style="color:var(--gold)">讓心靈走遍世界</strong>。
+  </div>
+  <div class="eflags">
+    <div class="eflag"><span>🇳🇵</span><small>尼泊爾</small></div>
+    <div class="ehandshake">🤝</div>
+    <div class="eflag"><span>🇮🇳</span><small>印度</small></div>
+  </div>
+  <div class="eschool">大豐國小 · 文山區國際文教中心 · 尼印豐彩展覽</div>
+</div>
+
+</div><!-- /slides -->
+
+<!-- ══ NAV BAR ══ -->
+<div id="nav">
+  <button class="nb home" onclick="go(0)">🏠 首頁</button>
+  <button class="nb" id="bp" onclick="prev()">← 上一頁</button>
+  <div id="counter">1 / 17</div>
+  <div id="dots"></div>
+  <button class="nb" id="bn" onclick="next()">下一頁 →</button>
+</div>
+
+<script>
+const slides = Array.from(document.querySelectorAll('.slide'));
+const total  = slides.length;
+let cur = 0, busy = false;
+
+/* Build dots */
+const dotBar = document.getElementById('dots');
+slides.forEach((_, i) => {
+  const d = document.createElement('div');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.title = 'Slide ' + (i + 1);
+  d.onclick = () => go(i);
+  dotBar.appendChild(d);
+});
+
+function updateUI() {
+  document.getElementById('counter').textContent = (cur + 1) + ' / ' + total;
+  document.getElementById('bp').disabled = cur === 0;
+  document.getElementById('bn').disabled = cur === total - 1;
+  document.getElementById('progress').style.width = ((cur + 1) / total * 100).toFixed(1) + '%';
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+}
+
+function go(index) {
+  if (busy || index === cur || index < 0 || index >= total) return;
+  busy = true;
+  const prev = slides[cur];
+  prev.classList.remove('active');
+  prev.classList.add('exiting');
+  setTimeout(() => { prev.classList.remove('exiting'); }, 460);
+  cur = index;
+  slides[cur].classList.add('active');
+  updateUI();
+  setTimeout(() => { busy = false; }, 460);
+}
+
+function next() { go(cur + 1); }
+function prev() { go(cur - 1); }
+
+/* Keyboard */
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); next(); }
+  else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp')                 { e.preventDefault(); prev(); }
+  else if (e.key === 'Home')  { e.preventDefault(); go(0); }
+  else if (e.key === 'End')   { e.preventDefault(); go(total - 1); }
+});
+
+/* Touch swipe */
+let tx = 0;
+document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
+document.addEventListener('touchend',   e => {
+  const dx = tx - e.changedTouches[0].clientX;
+  if (Math.abs(dx) > 48) dx > 0 ? next() : prev();
+}, { passive: true });
+
+updateUI();
+</script>
+</body>
+</html>
